@@ -55,7 +55,7 @@ class sce implements EventSubscriberInterface
 		$this->template->assign_vars(array('S_SCEDITOR' => true,
 			'MAX_FONTSIZE' => $this->config['max_post_font_size'],
 			'U_EMOTICONS_ROOT' => $this->root_path . $this->config['smilies_path'] . '/',
-			'U_CSS' => $this->root_path . 'ext/cosmo/sceditor/styles/all/template/js/themes/' . $this->css_file));
+			'U_CSS' => $this->root_path . 'ext/cosmo/sceditor/styles/' . (is_dir($this->root_path . 'ext/cosmo/sceditor/styles/' . $this->user->style['style_path']) ? $this->user->style['style_path'] : 'all') . '/template/js/themes/' . $this->css_file));
 
 		// Localize it maybe?
 		$lang = $this->get_lang();

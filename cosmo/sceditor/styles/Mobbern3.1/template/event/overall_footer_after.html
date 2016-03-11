@@ -1,0 +1,288 @@
+<!-- IF S_SCEDITOR -->
+<!-- INCLUDEJS @cosmo_sceditor/js/jquery.sceditor.bbcode.min.js -->
+<!-- IF L_SCEDITOR_LANG --><!-- INCLUDEJS @cosmo_sceditor/js/languages/{L_SCEDITOR_LANG}.js --><!-- ENDIF -->
+<script type="text/javascript">
+	var sceController = (function ($, undefined) {
+		var _sourceButton, _sourceButtonAvailable,
+				_textarea,
+		<!-- IF S_SMILIES_ALLOWED -->
+				_smiliesCheckbox,
+		<!-- ENDIF -->
+		<!-- IF S_BBCODE_ALLOWED -->
+				_sourceCheckbox,
+				_currentSourceMode,
+		<!-- ENDIF -->
+				_sceInstance,
+				_max_fontsize = {MAX_FONTSIZE},
+				_lastStyleSheet = {},
+				_styleSheets,
+				_cssString,
+				_cssBase,
+				_docroot,
+				_fullDocroot,
+				_tmp,
+				_internalMethods = {
+					'sourceMode': function (_active) {
+						// Are we on a page where SCEditor is loaded and used?
+						if ('undefined' === typeof _sceInstance || 'undefined' === typeof _sceInstance.sourceMode) {
+							return null;
+						}
+						if (typeof _active === 'undefined') {
+							return _sceInstance.sourceMode();
+						}
+						_active = !!_active;
+						_sceInstance.sourceMode(_active);
+					},
+					'sourceButton': {
+						'init': function () {
+							_sourceButton = $('a.sceditor-button-source');
+							_sourceButtonAvailable = !!_sourceButton.length;
+							_sourceCheckbox = $('#disable_bbcode');
+						},
+						'hide': function () {
+							if (_sourceButtonAvailable) {
+								_sourceButton.hide();
+							}
+						},
+						'setOnClick': function () {
+							_sourceCheckbox.on('click', function () {
+								if (_sourceCheckbox.is(':checked')) {
+									// We need this to know if we have to go back to WYSIWYG or not
+									_currentSourceMode = _internalMethods.sourceMode();
+									_internalMethods.sourceMode(true);
+									if (_sourceButtonAvailable) {
+										_sourceButton.hide();
+									}
+								}
+								else {
+									// Only back to WYSIWYG if it was active before
+									if (!_currentSourceMode) {
+										_internalMethods.sourceMode(false);
+									}
+									if (_sourceButtonAvailable) {
+										_sourceButton.show();
+									}
+								}
+							});
+						}
+					},
+					'getDocroot': function () {
+						if ('undefined' !== typeof _docroot) {
+							return _docroot;
+						}
+						else if ('/' === location.pathname.substr(-1)) {
+							_docroot = location.pathname;
+						}
+						else {
+							_tmp = location.pathname.lastIndexOf('/') + 1;
+							_docroot = location.pathname.substr(0, _tmp);
+						}
+						_fullDocroot = location.protocol + '//' + ('' === location.username ? '' : (location.username + ('' === location.password ? '' : (':' + location.password)) + '@')) + location.hostname + ('' === location.port ? '' : ':' + location.port) + _docroot;
+						return _docroot;
+					},
+					'emoticons': {
+						'init': function () {
+							_smiliesCheckbox = $('#disable_smilies');
+						},
+						'setOnClick': function () {
+							_smiliesCheckbox.on('click', function () {
+								if (_smiliesCheckbox.is(':checked')) {
+									_sceInstance.emoticons(false);
+								}
+								else {
+									_sceInstance.emoticons(true);
+								}
+							});
+						}
+					},
+					'css': {
+						'getBase': function (_cssStyleSheet) {
+							// Is this really a CSSStyleSheet object?
+							if (!(_cssStyleSheet instanceof CSSStyleSheet)) {
+								return false;
+							}
+							// Did we parse this StyleSheet already?
+							if (_cssStyleSheet === _lastStyleSheet && !('undefined' === typeof _cssBase)) {
+								return _cssBase;
+							}
+
+							// Stylesheet directly on the page?
+							if ((null === typeof _cssStyleSheet.href) || (null === _cssStyleSheet.href)) {
+								_tmp = location.href.match(/[^?]+\//);
+							}
+							else {
+								_tmp = _cssStyleSheet.href.match(/[^?]+\//);
+							}
+
+							_cssBase = _tmp[0];
+							_lastStyleSheet = _cssStyleSheet;
+							return _cssBase;
+						},
+						'realpath': function (_path) {
+							/**
+							 *  I dont use
+							 *  if (-1 !== $.inArray(0, [path.indexOf('/'), path.indexOf('http://'), path.indexOf('https://'), path.length])) {
+						 *  because all indexOf and the length have to be calculated before the check starts.
+						 *  The "normal" version is faster.
+						 */
+							// Do we really have to do something?
+							if (0 === _path.length) {
+								// No path info.. nothing to do
+								return _path;
+							}
+							else if (0 === _path.indexOf('http://') || 0 === _path.indexOf('https://')) {
+								// Check if the path starts with Docroot and if yes cut it out
+								_internalMethods.getDocroot();
+								if (0 === _path.indexOf(_fullDocroot)) {
+									_path = _path.substr(_fullDocroot.length);
+								}
+							}
+
+							// Lets do it
+							_tmp = _path.split('/');
+							_path = [];
+							for (var _i in _tmp) {
+								if (_tmp.hasOwnProperty(_i) && '.' !== _tmp[_i] && '' !== _tmp[_i]) {
+									if ('..' === _tmp[_i]) {
+										_path.pop();
+									}
+									else {
+										_path.push(_tmp[_i]);
+									}
+								}
+							}
+							_path = _path.join('/');
+							return _path;
+						},
+						'getWindowStyles': function () {
+							var _i, _j, _cssRules, _count, _countJ;
+							_styleSheets = document.styleSheets;
+							_cssString = '';
+							_count = _styleSheets.length;
+
+							for (_i = 0; _i < _count; _i++) {
+								this.getBase(_styleSheets[_i]);
+								try
+								{
+									// Don't parse external CSS
+									if (_cssBase !== _fullDocroot) {
+										continue;
+									}
+									if (_styleSheets[_i].cssRules) {
+										_cssRules = _styleSheets[_i].cssRules;
+										_countJ = _cssRules.length;
+										for (_j = 0; _j < _countJ; _j++) {
+											_cssString += this.fixUrlPathes(_cssRules[_j].cssText);
+										}
+									
+									}
+									else {
+										_cssString += this.fixUrlPathes(_styleSheets[_i].cssText);  // IE8 and earlier
+									}
+								}
+								catch (error)
+								{
+									console.log("CSS rule could not be applied!\n" + error.message);
+								}
+							}
+						},
+						'fixUrlPathes': function (_css) {
+							var _url, _i;
+							if (-1 === _css.indexOf('url')) {
+								// no url in the CSS String, there is nothing to do
+								return _css;
+							}
+							_tmp = _css.replace(/url\s*\(\s*["']?([^)]+?)["']?\s*\)/g, function (matching, group1) {
+								return ('url("' + _internalMethods.css.realpath(_cssBase + group1) + '")');
+							});
+							return _tmp;
+						}
+					}
+				};
+		return {
+			'getMaxFontsize': function () {
+				return _max_fontsize;
+			},
+			'isMaxFontsizeSet': function () {
+				return !!_max_fontsize;
+			},
+			'getTextarea': function () {
+				if (typeof _textarea === 'undefined' || !_textarea.length) {
+					_textarea = $('textarea[name="message"]');
+				}
+				return _textarea;
+			},
+			'init': function () {
+				this.getTextarea();
+				_internalMethods.css.getWindowStyles();
+				// Replace all textarea's
+				// with SCEditor
+				_textarea.sceditor({
+					plugins: "bbcode",
+					<!-- IF S_QUICK_REPLY -->
+					toolbar: "bold,italic,underline,strike|code,quote,removeformat|source",
+					<!-- ELSE -->
+					toolbarExclude: "emoticon",
+					<!-- ENDIF -->
+					<!-- IF S_SMILIES_ALLOWED -->
+					emoticonsRoot: "{U_EMOTICONS_ROOT}",
+					emoticons: {
+						dropdown: {
+							<!-- BEGIN emoticons -->
+							"{emoticons.code|escape('js')}": "{emoticons.url}"<!-- IF !emoticons.S_LAST_ROW -->, <!-- ENDIF -->
+							<!-- END emoticons -->
+						}
+					},
+					<!-- ELSE -->
+					emoticonsEnabled: false,
+					<!-- ENDIF -->
+					style: '" /><style type="text/css">' + _cssString + '</style><link rel="stylesheet" type="text/css" href="{U_CSS}?assets_version={T_ASSETS_VERSION}'
+				});
+
+				// Fix the position of the editor layer
+				$('.sceditor-container:eq(0)').css('z-index', 1).attr('id', 'sceditor-main-div');
+				$('#notification_list').css('z-index', 20);
+
+				// Set used nodes (mostly checkboxes)
+				_sceInstance = _textarea.sceditor('instance');
+
+				// Initialize the availability of the SCEditor source button
+				_internalMethods.sourceButton.init();
+				<!-- IF S_BBCODE_ALLOWED -->
+				<!-- IF not S_BBCODE_CHECKED eq '' -->
+				// BBCode is checked as disallowed, set SCEditor to sourceMode
+				_internalMethods.sourceMode(true);
+				<!-- ENDIF -->
+				// Initialize the onclick event for the BBCode checkbox
+				_internalMethods.sourceButton.setOnClick();
+				<!-- ELSE -->
+				/**
+				 * BBCodes are completly disallowed
+				 * Hide the sourceButton of SCEditor if visible
+				 * and change to sourceMode
+				 */
+				_internalMethods.sourceButton.hide();
+				_internalMethods.sourceMode(true);
+				<!-- ENDIF -->
+
+				// Emoticons part
+				<!-- IF S_SMILIES_ALLOWED -->
+				_internalMethods.emoticons.init();
+				<!-- IF not S_SMILIES_CHECKED eq '' -->
+				_sceInstance.emoticons(false);
+				<!-- ENDIF -->
+				_internalMethods.emoticons.setOnClick();
+				<!-- ENDIF -->
+			},
+			'destroy': function () {
+				// Make sure that this is only called
+				// when SCEditor is initialized
+				if (_sceInstance instanceof Object && _sceInstance.hasOwnProperty('destroy')) {
+					_sceInstance.destroy();
+				}
+			}
+		}
+	})(jQuery);
+</script>
+<!-- INCLUDEJS @cosmo_sceditor/js/sce.js -->
+<!-- ENDIF -->

@@ -1,0 +1,48 @@
+/* BB Code styles
+----------------------------------------*/
+/* Quote block */
+html, body {
+	background-color: transparent !important;
+	min-height: 100vh;
+	min-width: 100%;
+}
+
+.ie body {
+	min-height: 100vh !important;
+}
+
+.editor {
+	cursor: text;
+}
+
+img {
+	display: inline;
+}
+
+blockquote {
+	background: transparent none 6px 8px no-repeat;
+	border: 1px solid transparent;
+	background-color: #EBEADD;
+	background-image: url("images/quote.gif");
+	border-color:#DBDBCE;
+	font-size: 0.95em;
+	margin: 0.5em 1px 0 25px;
+	overflow: hidden;
+	padding: 5px;
+}
+blockquote blockquote {
+	/* Nested quotes */
+	font-size: 1em;
+	margin: 0.5em 1px 0 15px;
+}
+blockquote cite {
+	/* Username/source of quoter */
+	font-style: normal;
+	font-weight: bold;
+	margin-left: 20px;
+	display: block;
+	font-size: 0.9em;
+}
+blockquote.uncited {
+	padding-top: 25px;
+}

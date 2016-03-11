@@ -1,0 +1,12 @@
+<!-- IF S_SCEDITOR -->
+<script type="text/javascript">
+	$(function () {
+		$('div.inner > a > img').each(function () {
+			$(this).click(function () {
+				opener.setSmilie($(this).attr('alt'));
+				return false;
+			});
+		});
+	});
+</script>
+<!-- ENDIF -->
