@@ -153,4 +153,14 @@ $(function () {
 			return false;
 		});
 	});
+
+	// Attachments
+	var $fileList = $fileList || $('#file-list');
+	// I use almost a 100% copy of the plupload JS code
+	$fileList.on('click', '.file-inline-bbcode', function(e) {
+		var attachId = $(this).parents('.attach-row').attr('data-attach-id'),
+			index = phpbb.plupload.getIndex(attachId),
+			textinsert = '[attachment=' + index + ']' + phpbb.plupload.data[index].real_filename + '[/attachment]';
+		textarea.data('sceditor').insert(textinsert);
+	});
 });
