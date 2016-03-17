@@ -219,11 +219,7 @@
 				// with SCEditor
 				_textarea.sceditor({
 					plugins: "bbcode",
-					<!-- IF S_QUICK_REPLY -->
-					toolbar: "bold,italic,underline,strike|code,quote,removeformat|source",
-					<!-- ELSE -->
-					toolbarExclude: "emoticon",
-					<!-- ENDIF -->
+					toolbarExclude: "print,maximize",
 					<!-- IF S_SMILIES_ALLOWED -->
 					emoticonsRoot: "{U_EMOTICONS_ROOT}",
 					emoticons: {
@@ -238,7 +234,6 @@
 					<!-- ENDIF -->
 					style: '" /><style type="text/css">' + _cssString + '</style><link rel="stylesheet" type="text/css" href="{U_CSS}?assets_version={T_ASSETS_VERSION}'
 				});
-
 				// Fix the position of the editor layer
 				$('.sceditor-container:eq(0)').css('z-index', 1).attr('id', 'sceditor-main-div');
 				$('#notification_list').css('z-index', 20);

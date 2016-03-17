@@ -146,6 +146,7 @@ $(function () {
 	textarea = sceController.getTextarea();
 	// Hide the normal BBCode Buttons
 	$('#format-buttons').hide();
+	$('#smiley-box').hide();
 	$('#smiley-box a img').each(function () {
 
 		$(this).click(function () {
