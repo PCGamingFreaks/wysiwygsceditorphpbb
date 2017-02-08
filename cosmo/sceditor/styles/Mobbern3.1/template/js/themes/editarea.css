@@ -46,3 +46,12 @@ blockquote cite {
 blockquote.uncited {
 	padding-top: 25px;
 }
+/* Visible table borders */
+table {
+	border-collapse: collapse;
+}
+td {
+	border: solid 1px Black;
+	padding: 5px;
+	min-width: 25px;
+}
