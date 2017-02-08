@@ -3,7 +3,7 @@
   "type": "phpbb-extension",
   "description": "WYSIWYG BBCode Editor",
   "homepage": "https://github.com/cYbercOsmOnauT/wysiwygsceditorphpbb",
-  "version": "1.7.7",
+  "version": "1.7.8",
   "time": "2015-03-28",
   "license": "GPL-2.0",
   "authors": [
@@ -28,7 +28,7 @@
   "extra": {
     "display-name": "phpbb 3.1 WYSIWYG BBCode Editor",
     "soft-require": {
-      "phpbb/phpbb": ">=3.1.5,<3.2.*@dev"
+      "phpbb/phpbb": ">=3.1.5,<=3.2.*@dev"
     },
     "version-check": {
       "host": "www.web-coding.eu",
