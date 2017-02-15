@@ -3,8 +3,8 @@
   "type": "phpbb-extension",
   "description": "WYSIWYG BBCode Editor",
   "homepage": "https://github.com/cYbercOsmOnauT/wysiwygsceditorphpbb",
-  "version": "1.7.8",
-  "time": "2015-03-28",
+  "version": "1.8.0",
+  "time": "2017-02-14",
   "license": "GPL-2.0",
   "authors": [
     {

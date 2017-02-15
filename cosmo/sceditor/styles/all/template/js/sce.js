@@ -135,6 +135,46 @@ $.sceditor.plugins.bbcode.bbcode.set('quote', {
 	breakEnd: false
 });
 
+$.sceditor.plugins.bbcode.bbcode.set('list', {
+    tags: {
+    	"ul": null,
+		"ol": null
+	},
+	isInline: false,
+    skipLastLineBreak: true,
+	breakStart: true,
+	breakAfter: false,
+    format: function(element, content) {
+		return content;
+    },
+    html: function(token, attrs, content) {
+    	if (token.val == "[list=1]") {
+    		return "<ol>" + content + "</ol>";
+		}
+		return "<ul>" + content + "</ul>";
+    },
+    quoteType: $.sceditor.BBCodeParser.QuoteType.never
+});
+
+$.sceditor.plugins.bbcode.bbcode.set('*', {
+    tags: {
+        "li": null
+    },
+	skipLastLineBreak: true,
+	format: "[*]{0}",
+	html: "<li>{0}</li>",
+	quoteType: $.sceditor.BBCodeParser.QuoteType.never,
+	closedBy: ['/list', '*']
+});
+
+$.sceditor.command.set('bulletlist', {
+	txtExec: ["[list]\n[*] ", "\n[/list]"]
+});
+
+$.sceditor.command.set('orderedlist', {
+    txtExec: ["[list=1]\n[*] ", "\n[/list]"]
+});
+
 // This is needed for the smilies popup
 function setSmilie(tag) {
 	textarea.data('sceditor').insert(' ' + tag + ' ');
@@ -146,13 +186,38 @@ $(function () {
 	textarea = sceController.getTextarea();
 	// Hide the normal BBCode Buttons
 	$('#format-buttons').hide();
-	$('#smiley-box a img').each(function () {
+	var maxWidth = $('.posting-contents').css('width');
+	if (maxWidth == undefined) {
+		maxWidth = parseInt($('#qr_postform').css('width')) - 30;
+	} else {
+		maxWidth = parseInt(maxWidth) + 30;
+	}
+    $('#sceditor-main-div').css('width', (maxWidth - 100) + 'px');
+    $('#sceditor-main-div iframe').css('width', (maxWidth - 110) + 'px');
+	$('#sceditor-main-div').css('maxWidth', maxWidth + 'px');
+    $('#sceditor-main-div iframe').css('maxWidth', (maxWidth - 10) + 'px');
+    $('#smiley-box').hide();
 
-		$(this).click(function () {
-			setSmilie($(this).attr('alt'));
-			return false;
-		});
-	});
+    // Set standard BBCode Icon if nothing could be found
+    $('.sceditor-button').each(function(index, elem) {
+    	var className = "." + elem.classList[1] + " div";
+    	var found = false;
+		for (var i = 0; i < document.styleSheets.length; i++) {
+			var rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
+			for (var rule in rules) {
+				if (rules[rule].selectorText == className) {
+					found = true;
+					break;
+				}
+			}
+			if (found) {
+				break;
+			}
+		}
+		if (!found) {
+			$(this).find('div').addClass('default-background');
+		}
+    });
 
 	// Attachments
 	var $fileList = $fileList || $('#file-list');

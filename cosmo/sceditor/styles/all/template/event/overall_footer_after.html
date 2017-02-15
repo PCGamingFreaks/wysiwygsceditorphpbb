@@ -14,7 +14,7 @@
 		<!-- ENDIF -->
 				_sceInstance,
 				_max_fontsize = {MAX_FONTSIZE},
-				_lastStyleSheet = { },
+				_lastStyleSheet = {},
 				_styleSheets,
 				_cssString,
 				_cssBase,
@@ -162,21 +162,27 @@
 
 							for (_i = 0; _i < _count; _i++) {
 								this.getBase(_styleSheets[_i]);
+								try
+								{
+									// Don't parse external CSS
+									if (_cssBase !== _fullDocroot) {
+										continue;
+									}
+									if (_styleSheets[_i].cssRules) {
+										_cssRules = _styleSheets[_i].cssRules;
+										_countJ = _cssRules.length;
+										for (_j = 0; _j < _countJ; _j++) {
+											_cssString += this.fixUrlPathes(_cssRules[_j].cssText);
+										}
 
-								// Don't parse external CSS
-								if (_cssBase !== _fullDocroot) {
-									continue;
-								}
-
-								if (_styleSheets[_i].cssRules) {
-									_cssRules = _styleSheets[_i].cssRules;
-									_countJ = _cssRules.length;
-									for (_j = 0; _j < _countJ; _j++) {
-										_cssString += this.fixUrlPathes(_cssRules[_j].cssText);
+									}
+									else {
+										_cssString += this.fixUrlPathes(_styleSheets[_i].cssText);  // IE8 and earlier
 									}
 								}
-								else {
-									_cssString += this.fixUrlPathes(_styleSheets[_i].cssText);  // IE8 and earlier
+								catch (error)
+								{
+									console.log("CSS rule could not be applied!\n" + error.message);
 								}
 							}
 						},
@@ -211,13 +217,12 @@
 				_internalMethods.css.getWindowStyles();
 				// Replace all textarea's
 				// with SCEditor
+                initCustomBBCodes({SCEDITOR_CUSTOM_BBCODES_SCRIPTS});
 				_textarea.sceditor({
 					plugins: "bbcode",
-					<!-- IF S_QUICK_REPLY -->
-					toolbar: "bold,italic,underline,strike|code,quote,removeformat|source",
-					<!-- ELSE -->
-					toolbarExclude: "emoticon",
-					<!-- ENDIF -->
+                    toolbar: "bold,italic,underline,strike,subscript,superscript|left,center,right,justify|font,size,color,removeformat|cut,copy,paste,pastetext|bulletlist,orderedlist,indent,outdent|" +
+                            "table|code,quote|horizontalrule,image,email,link,unlink|emoticon,youtube,date,time|ltr,rtl{SCEDITOR_CUSTOM_BBCODES_TOOLBAR}|source",
+					toolbarExclude: "print,maximize",
 					<!-- IF S_SMILIES_ALLOWED -->
 					emoticonsRoot: "{U_EMOTICONS_ROOT}",
 					emoticons: {
@@ -234,7 +239,10 @@
 				});
 
 				// Fix the position of the editor layer
-				$('.sceditor-container:eq(0)').css('z-index', 1);
+                $('#message').remove();
+                var scEditorMain = $('.sceditor-container:eq(0)');
+				scEditorMain.css('z-index', 1).attr('id', 'sceditor-main-div');
+				scEditorMain.find('textarea').attr('id', 'message').attr('name', 'message').addClass('inputbox');
 				$('#notification_list').css('z-index', 20);
 
 				// Set used nodes (mostly checkboxes)
@@ -255,7 +263,7 @@
 				 * Hide the sourceButton of SCEditor if visible
 				 * and change to sourceMode
 				 */
-				_internalMethods.sourceButton.hide();
+				//_internalMethods.sourceButton.hide();
 				_internalMethods.sourceMode(true);
 				<!-- ENDIF -->
 
@@ -277,6 +285,124 @@
 			}
 		}
 	})(jQuery);
+
+    function initCustomBBCodes(bbcodeInitializationData) {
+        for (var bbcode in bbcodeInitializationData) {
+            addBBCode(bbcodeInitializationData[bbcode])
+        }
+    }
+
+    function addBBCode(data) {
+        var command = data[0];
+        var format = data[1];
+        var counter = 0;
+        while (format.match(/\{\D[^\}]*\}/) != null) {
+            format = format.replace(/\{\D[^\}]*\}/, '{' + (counter++) + '}');
+        }
+        var insertion = format.replace(/\{[^\}]*\}/g, "");
+        var tooltip = data[2];
+        var template = data[3];
+        counter = 0;
+        while (template.match(/\{\D[^\}]*\}/) != null) {
+            template = template.replace(/\{\D[^\}]*\}/, '{' + (counter++) + '}');
+        }
+        switch (command) {
+            case 'shield':
+                var createSmilieButton = $('#pcgf-smiliecreator-create');
+                $.sceditor.command.set(command, {
+                    exec: function() {
+                        this.insert('[shield]Text[/shield]');
+                    },
+                    txtExec: function() {
+                        createSmilieButton.trigger('click');
+                    },
+                    tooltip: tooltip == '' ? command : tooltip
+                });
+                $.sceditor.plugins.bbcode.bbcode.set('shield', {
+                    tags: {
+                        "shield": null
+                    },
+                    isInline: false,
+                    skipLastLineBreak: true,
+                    format: function(element, content) {
+                        if (element.attr('settings') != undefined) {
+                            return "[shield=" + element.attr('settings') + "]" + content.substr(1, content.length - 2) + "[/shield]";
+                        }
+                        return "[shield]" + content.substr(1, content.length - 2) + "[/shield]";
+                    },
+                    html: function(token, attrs, content) {
+                        if (attrs['defaultattr'] != undefined) {
+                            return "<shield settings='" + attrs['defaultattr'] + "'>[" + content + "]</shield>";
+                        }
+                        return "<shield>[" + content + "]</shield>";
+                    },
+                    quoteType: $.sceditor.BBCodeParser.QuoteType.never
+                });
+                break;
+            case 'speechbubble':
+                $.sceditor.plugins.bbcode.bbcode.set('speechbubble', {
+                    tags: {
+                        "speechbubble": null
+                    },
+                    isInline: false,
+                    skipLastLineBreak: true,
+                    format: function(element, content) {
+                        if (element.attr('settings') != undefined) {
+                            return "[speechbubble=" + element.attr('settings') + "]" + content.substr(1, content.length - 2) + "[/speechbubble]";
+                        }
+                        return "[speechbubble]" + content.substr(1, content.length - 2) + "[/speechbubble]";
+                    },
+                    html: function(token, attrs, content) {
+                        if (attrs['defaultattr'] != undefined) {
+                            return "<speechbubble settings='" + attrs['defaultattr'] + "'>(" + content + ")</speechbubble>";
+                        }
+                        return "<speechbubble>(" + content + ")</speechbubble>";
+                    },
+                    quoteType: $.sceditor.BBCodeParser.QuoteType.never
+                });
+                break;
+            case 'spoiler':
+                $.sceditor.command.set(command, {
+                    exec: function() {
+                        this.insert('[spoiler]Text[/spoiler]');
+                    },
+                    txtExec: ['[spoiler]', '[/spoiler]'],
+                    tooltip: tooltip == '' ? command : tooltip
+                });
+                $.sceditor.plugins.bbcode.bbcode.set('spoiler', {
+                    tags: {
+                        "spoiler": null
+                    },
+                    isInline: false,
+                    skipLastLineBreak: true,
+                    format: function(element, content) {
+                        return "[spoiler]" + content.replace("[spoiler]", "").replace("[/spoiler]", "") + "[/spoiler]";
+                    },
+                    html: function(token, attrs, content) {
+                        return "<spoiler>[spoiler]" + content + "[/spoiler]</spoiler>";
+                    },
+                    quoteType: $.sceditor.BBCodeParser.QuoteType.never
+                });
+            case 'shield=':
+            case 'speechbubble=':
+                break;
+            default:
+                $.sceditor.command.set(command, {
+                    exec: function() {
+                        this.insert(insertion);
+                    },
+                    txtExec: [insertion],
+                    tooltip: tooltip == '' ? command : tooltip
+                });
+                $.sceditor.plugins.bbcode.bbcode.set(command, {
+                    skipLastLineBreak: true,
+                    format: format,
+                    html: template,
+                    quoteType: $.sceditor.BBCodeParser.QuoteType.auto
+                });
+                break;
+        }
+    }
 </script>
 <!-- INCLUDEJS @cosmo_sceditor/js/sce.js -->
 <!-- ENDIF -->

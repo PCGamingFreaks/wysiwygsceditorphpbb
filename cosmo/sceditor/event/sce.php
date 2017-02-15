@@ -74,6 +74,26 @@ class sce implements EventSubscriberInterface
 		{
 			$this->template->assign_block_vars('emoticons', array('code' => $row['code'], 'url' => $row['smiley_url']));
 		}
+		$toolbar = '';
+		$scripts = '';
+		$sql = 'SELECT bbcode_tag, bbcode_match, bbcode_helpline, bbcode_tpl, display_on_posting
+		    FROM ' . BBCODES_TABLE;
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
+        {
+            if (!$this->is_defined_bbcode($row['bbcode_tag']))
+            {
+                if ($row['display_on_posting'])
+                {
+                    $toolbar .= ($toolbar == '' ? '|' : ',') . $row['bbcode_tag'];
+                }
+                $scripts .= ($scripts == '' ? '' : ',') . '[\'' . $row['bbcode_tag'] . '\',\'' . $row['bbcode_match'] . '\',\'' . $row['bbcode_helpline'] . '\',"' . str_replace('"', '\\"', $row['bbcode_tpl']) . '"]';
+            }
+        }
+        $this->template->assign_vars(array(
+            'SCEDITOR_CUSTOM_BBCODES_TOOLBAR' => $toolbar,
+            'SCEDITOR_CUSTOM_BBCODES_SCRIPTS' => '[' . $scripts . ']',
+        ));
 	}
 
 	private function get_lang()
@@ -91,4 +111,31 @@ class sce implements EventSubscriberInterface
 		}
 		return false;
 	}
+
+	private function is_defined_bbcode($bbcode)
+    {
+        switch ($bbcode)
+        {
+            case 'li':
+            case 'ul':
+            case 's':
+            case 'sub':
+            case 'sup':
+            case 'left':
+            case 'right':
+            case 'center':
+            case 'justify':
+            case 'font=':
+            case 'ol':
+            case 'table':
+            case 'td':
+            case 'tr':
+            case 'hr':
+            case 'youtube':
+            case 'rtl':
+            case 'ltr':
+                return true;
+        }
+        return false;
+    }
 }
