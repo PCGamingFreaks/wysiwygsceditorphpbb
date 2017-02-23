@@ -186,16 +186,6 @@ $(function () {
 	textarea = sceController.getTextarea();
 	// Hide the normal BBCode Buttons
 	$('#format-buttons').hide();
-	var maxWidth = $('.posting-contents').css('width');
-	if (maxWidth == undefined) {
-		maxWidth = parseInt($('#qr_postform').css('width')) - 30;
-	} else {
-		maxWidth = parseInt(maxWidth) + 30;
-	}
-    $('#sceditor-main-div').css('width', (maxWidth - 100) + 'px');
-    $('#sceditor-main-div iframe').css('width', (maxWidth - 110) + 'px');
-	$('#sceditor-main-div').css('maxWidth', maxWidth + 'px');
-    $('#sceditor-main-div iframe').css('maxWidth', (maxWidth - 10) + 'px');
     $('#smiley-box').hide();
 
     // Set standard BBCode Icon if nothing could be found

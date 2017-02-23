@@ -218,7 +218,21 @@
 				// Replace all textarea's
 				// with SCEditor
                 initCustomBBCodes({SCEDITOR_CUSTOM_BBCODES_SCRIPTS});
-				_textarea.sceditor({
+                var maxWidth = $('#postingbox').css('width');
+                var height = 400;
+                if (maxWidth == undefined) {
+                    maxWidth = parseInt($('#qr_postform').css('width')) - 30;
+                    $('#qr_postform').on('submit', function() {
+                        _internalMethods.sourceMode(true);
+                    });
+                    height = 150;
+                } else {
+                    maxWidth = parseInt(maxWidth) - 30;
+                }
+                _textarea.sceditor({
+				    width: maxWidth,
+                    height: height,
+                    resizeMaxWidth: maxWidth,
 					plugins: "bbcode",
                     toolbar: "bold,italic,underline,strike,subscript,superscript|left,center,right,justify|font,size,color,removeformat|cut,copy,paste,pastetext|bulletlist,orderedlist,indent,outdent|" +
                             "table|code,quote|horizontalrule,image,email,link,unlink|emoticon,youtube,date,time|ltr,rtl{SCEDITOR_CUSTOM_BBCODES_TOOLBAR}|source",
@@ -239,14 +253,33 @@
 				});
 
 				// Fix the position of the editor layer
-                $('#message').remove();
+                $('#message').hide();
+                $('#smiley-box').remove();
                 var scEditorMain = $('.sceditor-container:eq(0)');
 				scEditorMain.css('z-index', 1).attr('id', 'sceditor-main-div');
 				scEditorMain.find('textarea').attr('id', 'message').attr('name', 'message').addClass('inputbox');
-				$('#notification_list').css('z-index', 20);
+                var parser = new $.sceditor.BBCodeParser();
+                $('#notification_list').css('z-index', 20);
 
 				// Set used nodes (mostly checkboxes)
 				_sceInstance = _textarea.sceditor('instance');
+
+                if (height >= 400) {
+                    _sceInstance.bind('keyup', function() {
+                        if (_sceInstance.inSourceMode()) {
+                            _sceInstance.updateOriginal();
+                        } else {
+                            _sceInstance.setSourceEditorValue(parser.toBBCode(_sceInstance.getWysiwygEditorValue()));
+                            _sceInstance.updateOriginal();
+                        }
+                    });
+                    $('input[name="preview"]').on('click', function() {
+                        _sceInstance.sourceMode(true);
+                    });
+                    $('input[name="post"]').on('click', function() {
+                        _sceInstance.sourceMode(true);
+                    });
+                }
 
 				// Initialize the availability of the SCEditor source button
 				_internalMethods.sourceButton.init();
@@ -403,49 +436,6 @@
                 break;
         }
     }
-	<!-- This fixes the nested lists on SCEditor until the next release -->
-    $.sceditor.dom.fixNesting = function (node) {
-        var dom = $.sceditor.dom,
-            	getLastInlineParent = function (node) {
-            while (dom.isInline(node.parentNode, true)) {
-                node = node.parentNode;
-            }
-
-            return node;
-        };
-
-        dom.traverse(node, function (node) {
-            var list = 'ul,ol',
-                isBlock = !dom.isInline(node, true),
-                $node = $(node);
-
-            // Any blocklevel element inside an inline element needs fixing.
-            if (isBlock && dom.isInline(node.parentNode, true)) {
-                var	parent  = getLastInlineParent(node),
-                    rParent = parent.parentNode,
-                    before  = dom.extractContents(parent, node),
-                    middle  = node;
-
-                // copy current styling so when moved out of the parent
-                // it still has the same styling
-                dom.copyCSS(parent, middle);
-
-                rParent.insertBefore(before, parent);
-                rParent.insertBefore(middle, parent);
-            }
-
-            // Fix invalid nested lists which should be wrapped in an li tag
-            if (isBlock && $node.is(list) && $node.parent().is(list)) {
-                var $li = $node.prev('li');
-
-                if ($li.length) {
-                    $li.append($node);
-                } else {
-                    $node.wrap('<li />');
-                }
-            }
-        });
-    };
 </script>
 <!-- INCLUDEJS @cosmo_sceditor/js/sce.js -->
 <!-- ENDIF -->
