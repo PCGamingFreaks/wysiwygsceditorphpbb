@@ -14,7 +14,7 @@
 		<!-- ENDIF -->
 				_sceInstance,
 				_max_fontsize = {MAX_FONTSIZE},
-				_lastStyleSheet = {},
+				_lastStyleSheet = { },
 				_styleSheets,
 				_cssString,
 				_cssBase,
@@ -403,6 +403,49 @@
                 break;
         }
     }
+	<!-- This fixes the nested lists on SCEditor until the next release -->
+    $.sceditor.dom.fixNesting = function (node) {
+        var dom = $.sceditor.dom,
+            	getLastInlineParent = function (node) {
+            while (dom.isInline(node.parentNode, true)) {
+                node = node.parentNode;
+            }
+
+            return node;
+        };
+
+        dom.traverse(node, function (node) {
+            var list = 'ul,ol',
+                isBlock = !dom.isInline(node, true),
+                $node = $(node);
+
+            // Any blocklevel element inside an inline element needs fixing.
+            if (isBlock && dom.isInline(node.parentNode, true)) {
+                var	parent  = getLastInlineParent(node),
+                    rParent = parent.parentNode,
+                    before  = dom.extractContents(parent, node),
+                    middle  = node;
+
+                // copy current styling so when moved out of the parent
+                // it still has the same styling
+                dom.copyCSS(parent, middle);
+
+                rParent.insertBefore(before, parent);
+                rParent.insertBefore(middle, parent);
+            }
+
+            // Fix invalid nested lists which should be wrapped in an li tag
+            if (isBlock && $node.is(list) && $node.parent().is(list)) {
+                var $li = $node.prev('li');
+
+                if ($li.length) {
+                    $li.append($node);
+                } else {
+                    $node.wrap('<li />');
+                }
+            }
+        });
+    };
 </script>
 <!-- INCLUDEJS @cosmo_sceditor/js/sce.js -->
 <!-- ENDIF -->
