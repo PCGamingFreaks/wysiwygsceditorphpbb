@@ -83,6 +83,7 @@ class sce implements EventSubscriberInterface
         {
             if (!$this->is_defined_bbcode($row['bbcode_tag']))
             {
+                $row['bbcode_tag'] = str_replace("=", "", $row['bbcode_tag']);
                 if ($row['display_on_posting'])
                 {
                     $toolbar .= ($toolbar == '' ? '|' : ',') . $row['bbcode_tag'];
