@@ -28,3 +28,8 @@ blockquote cite {
 blockquote.uncited {
 	padding-top: 25px;
 }
+
+table tr td {
+	border: 1px solid black;
+	padding: 5px;
+}

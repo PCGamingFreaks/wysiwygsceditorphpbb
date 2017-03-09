@@ -198,11 +198,11 @@ class bbcodedata extends \phpbb\db\migration\migration
 				'bbcode_helpline' => '',
 				'display_on_posting' => 0,
 				'bbcode_match' => '[table]{TEXT}[/table]',
-				'bbcode_tpl' => '<table><tbody>{TEXT}</tbody></table>',
+				'bbcode_tpl' => '<table><!-- {TEXT} --></table>',
 				'first_pass_match' => '!\\[table\\](.*?)\\[/table\\]!ies',
 				'first_pass_replace' => '\'[table:$uid]\'.str_replace(array("\\r\\n", \'\\"\', \'\\\'\', \'(\', \')\'), array("\\n", \'"\', \'&#39;\', \'&#40;\', \'&#41;\'), trim(\'${1}\')).\'[/table:$uid]\'',
 				'second_pass_match' => '!\\[table:$uid\\](.*?)\\[/table:$uid\\]!s',
-				'second_pass_replace' => '<table><tbody>${1}</tbody></table>'
+				'second_pass_replace' => '<table><!-- ${1} --></table>'
 			),
 			array( // row #13
 				'bbcode_id' => ++$style_ids,
@@ -210,11 +210,11 @@ class bbcodedata extends \phpbb\db\migration\migration
 				'bbcode_helpline' => '',
 				'display_on_posting' => 0,
 				'bbcode_match' => '[td]{TEXT}[/td]',
-				'bbcode_tpl' => '<style>td {border: 1px dotted #000;}</style><td>{TEXT}</td>',
+				'bbcode_tpl' => 'td --> <td>{TEXT}</td> <!-- td',
 				'first_pass_match' => '!\\[td\\](.*?)\\[/td\\]!ies',
 				'first_pass_replace' => '\'[td:$uid]\'.str_replace(array("\\r\\n", \'\\"\', \'\\\'\', \'(\', \')\'), array("\\n", \'"\', \'&#39;\', \'&#40;\', \'&#41;\'), trim(\'${1}\')).\'[/td:$uid]\'',
 				'second_pass_match' => '!\\[td:$uid\\](.*?)\\[/td:$uid\\]!s',
-				'second_pass_replace' => '<style>td {border: 1px dotted #000;}</style><td>${1}</td>'
+				'second_pass_replace' => 'td --> <td>${1}</td> <!-- td'
 			),
 			array( // row #14
 				'bbcode_id' => ++$style_ids,
@@ -222,11 +222,11 @@ class bbcodedata extends \phpbb\db\migration\migration
 				'bbcode_helpline' => '',
 				'display_on_posting' => 0,
 				'bbcode_match' => '[tr]{TEXT}[/tr]',
-				'bbcode_tpl' => '<tr>{TEXT}</tr>',
+				'bbcode_tpl' => 'tr --><tr>{TEXT}</tr><!-- tr',
 				'first_pass_match' => '!\\[tr\\](.*?)\\[/tr\\]!ies',
 				'first_pass_replace' => '\'[tr:$uid]\'.str_replace(array("\\r\\n", \'\\"\', \'\\\'\', \'(\', \')\'), array("\\n", \'"\', \'&#39;\', \'&#40;\', \'&#41;\'), trim(\'${1}\')).\'[/tr:$uid]\'',
 				'second_pass_match' => '!\\[tr:$uid\\](.*?)\\[/tr:$uid\\]!s',
-				'second_pass_replace' => '<tr>${1}</tr>'
+				'second_pass_replace' => 'tr --><tr>${1}</tr><!-- tr'
 			),
 			array( // row #15
 				'bbcode_id' => ++$style_ids,
@@ -246,11 +246,11 @@ class bbcodedata extends \phpbb\db\migration\migration
 				'bbcode_helpline' => '',
 				'display_on_posting' => 0,
 				'bbcode_match' => '[youtube]{SIMPLETEXT}[/youtube]',
-				'bbcode_tpl' => '<iframe width="560" height="315" src="http://www.youtube.com/embed/{SIMPLETEXT}?wmode=opaque" data-youtube-id="{SIMPLETEXT}" frameborder="0" allowfullscreen></iframe>',
+				'bbcode_tpl' => '<iframe width="560" height="315" src="https://www.youtube.com/embed/{SIMPLETEXT}?wmode=opaque" data-youtube-id="{SIMPLETEXT}" frameborder="0" allowfullscreen></iframe>',
 				'first_pass_match' => '!\\[youtube\\]([a-zA-Z0-9-+.,_ ]+)\\[/youtube\\]!i',
 				'first_pass_replace' => '[youtube:$uid]${1}[/youtube:$uid]',
 				'second_pass_match' => '!\\[youtube:$uid\\]([a-zA-Z0-9-+.,_ ]+)\\[/youtube:$uid\\]!s',
-				'second_pass_replace' => '<iframe width="560" height="315" src="http://www.youtube.com/embed/${1}?wmode=opaque" data-youtube-id="${1}" frameborder="0" allowfullscreen></iframe>'
+				'second_pass_replace' => '<iframe width="560" height="315" src="https://www.youtube.com/embed/${1}?wmode=opaque" data-youtube-id="${1}" frameborder="0" allowfullscreen></iframe>'
 			),
 			array( // row #17
 				'bbcode_id' => ++$style_ids,
