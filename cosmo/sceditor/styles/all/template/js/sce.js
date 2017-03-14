@@ -188,27 +188,6 @@ $(function () {
 	$('#format-buttons').hide();
     $('#smiley-box').hide();
 
-    // Set standard BBCode Icon if nothing could be found
-    $('.sceditor-button').each(function(index, elem) {
-    	var className = "." + elem.classList[1] + " div";
-    	var found = false;
-		for (var i = 0; i < document.styleSheets.length; i++) {
-			var rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
-			for (var rule in rules) {
-				if (rules[rule].selectorText == className) {
-					found = true;
-					break;
-				}
-			}
-			if (found) {
-				break;
-			}
-		}
-		if (!found) {
-			$(this).find('div').addClass('default-background');
-		}
-    });
-
 	// Attachments
 	var $fileList = $fileList || $('#file-list');
 	// I use almost a 100% copy of the plupload JS code
