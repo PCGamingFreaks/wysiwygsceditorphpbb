@@ -254,7 +254,6 @@
 
 				// Fix the position of the editor layer
                 $('#message').hide();
-                $('#smiley-box').remove();
                 var scEditorMain = $('.sceditor-container:eq(0)');
 				scEditorMain.css('z-index', 1).attr('id', 'sceditor-main-div');
 				scEditorMain.find('textarea').attr('id', 'message').attr('name', 'message').addClass('inputbox');
@@ -342,15 +341,24 @@
         switch (command) {
             case 'shield':
                 var createSmilieButton = $('#pcgf-smiliecreator-create');
-                $.sceditor.command.set(command, {
+                var commandObject = {
                     exec: function() {
                         this.insert('[shield]Text[/shield]');
                     },
-                    txtExec: function() {
-                        createSmilieButton.trigger('click');
-                    },
                     tooltip: tooltip == '' ? command : tooltip
-                });
+                };
+                if (createSmilieButton.attr('id') !== undefined) {
+                    commandObject = {
+                        exec: function() {
+                            this.insert('[shield]Text[/shield]');
+                        },
+                        txtExec: function() {
+                            createSmilieButton.trigger('click');
+                        },
+                        tooltip: tooltip == '' ? command : tooltip
+                    };
+                }
+                $.sceditor.command.set(command, commandObject);
                 $.sceditor.plugins.bbcode.bbcode.set('shield', {
                     tags: {
                         "shield": null
