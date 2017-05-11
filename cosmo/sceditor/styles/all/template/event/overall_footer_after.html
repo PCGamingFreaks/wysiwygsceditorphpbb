@@ -253,7 +253,9 @@
 				});
 
 				// Fix the position of the editor layer
-                $('#message').hide();
+                $('#message').css({display: 'inline-block', height: '80px', width: '100%', color: 'transparent', 'background-color': 'transparent', 'line-height': 'inherit', resize: 'none', 'user-select': 'none', cursor: 'default'}).attr('spellcheck', 'false');
+                $('#message').insertAfter($('#add_files'));
+                $('<div style="display: inline-block; position: relative; top: 65px; left: 22%; font-weight: bold; font-size: 28px; font-family: \'Roboto Slab\'; color: #AAAAAA;">DRAG&nbsp;&amp;&nbsp;DROP&nbsp;UPLOAD</div>').insertAfter($('#add_files'));
                 var scEditorMain = $('.sceditor-container:eq(0)');
 				scEditorMain.css('z-index', 1).attr('id', 'sceditor-main-div');
 				scEditorMain.find('textarea').attr('id', 'message').attr('name', 'message').addClass('inputbox');
